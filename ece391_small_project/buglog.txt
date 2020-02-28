@@ -1,0 +1,193 @@
+mp2Author: Tianzuo Qin
+Time: 10/5/2019 15:14
+FileName: buglog.txt
+Content: Keeping track of Tianzuo Qin's bugs for MP2
+
+Bug No.1
+/********************* General Info *********************/
+
+Bug Type: Algorithmic errors
+Bug Appeared: 10/5/2019 15:24:08
+Bug Solved: 10/5/2019 16:08:23
+Debug Time: 44 min 
+Bug Location: text.c: 640 && text.c: 666
+
+/********************* Detail Info *********************/
+
+Description:
+   When changing the 4 different planes in "text2graphic" function in "text.c",
+I using mod operation to switch among those four planes. However, in fact, we have 4 planes from 0 to 3.
+It should use modulation by 4, but I only use mod 3. Therefore, my game crashed when I first entered into it.
+
+Solution:
+    First, I checked all of the other functions, and I knew that other functions were probably right.
+Then I thought that it might be thee "text2graphic"'s problem, because the picture can be displayed on the screen.
+It might be the status bar's problem. First, I read it line by line, and I found that something was mod by 3. Then I am 
+curious about it because there was nothing which can mod by 3. Therefore, I caught this problem and realized that it should 
+mod 4.
+    
+Bug No.2
+/********************* General Info *********************/
+
+Bug Type: Algorithmic errors
+Bug Appeared: 10/5/2019 16:30:01
+Bug Solved: 10/5/2019 17:35:45
+Debug Time: About 1 hr
+Bug Location: text.c: 588
+
+/********************* Detail Info *********************/
+
+Description:
+    After fixing the first bug described above, I could run the program but I met the error about the status bar's display is wrong.
+The pattern or word in status bar is undistinguishable. The root reason about it was that I made the order of 4 planes totally different.
+Therefore, the status bar's 4 different planes got wrong, and the pattern became undistinguishable. 
+
+Solution:
+    However, I had kept in mind that my understanding about the align of 4 different in VGA might be wrong.
+Then I went back to the document and rechecked the true align of the 4 planes. 
+In my offset array, plane should obey the little-endian, but I wrote it into big-endian.
+Then I knew that something was wrong when I align the offset those four planes. Therefore, I reverted the order of the plane array.
+Then it works.
+
+Bug No.3
+/********************* General Info *********************/
+
+Bug Type: Specification Ambiguity Errors
+Bug Appeared: 10/5/2019 16:45:33
+Bug Solved: 10/5/2019 17:00:42
+Debug Time: About 15 min
+Bug Location: modex.h: 57
+
+/********************* Detail Info *********************/
+
+Description:
+    When I was entering the room, and I thought that everything is OK. 
+    However, I have noticed that the plane could not move downwards compared to the demo version.
+Therefore, I think I made a failing assumption when I encountered the size of the picture
+
+Solution:
+    Originally, the size of the "logic view" is defined as 200 in "modex.h". However, it was only the original value of this picture.
+Once I added the bar which was 18-pixel high, I must resize it to the 200-12 to make the space for the status bar. Therefore, when I deducted this value, I can successfully scrolled the screen when I was entering the first room.
+    The main reason of my mistake is neglecting the constant in ".h" file.
+
+Bug No.4
+/********************* General Info *********************/
+
+Bug Type: Algorithm Errors
+Bug Appeared: 10/6/2019 08:27:25
+Bug Solved: 10/5/2019 10:00:57
+Debug Time: About 1.5 hr
+Bug Location: adventure.c: [293,315]
+
+/********************* Detail Info *********************/
+
+Description:
+    When tried to test my final version of checkpoint 1, I tried to input some random command. However, I found that my program got into a segmentation fault when my input reached the length of 20. The input part of my status bar was all strange characters. However, the picture and the room name part did not be influenced by this segmentation fault.
+
+Solution:
+    From my previous code style, I first judged whether the length of the input string reached 20. If reached 20, I chose to deal with it in another way. Therefore, I noticed that it might be the fault in this part. 
+    Originally, I first create a string (on stack) with maximum length of 20. I got a copy of the length and then add a '_' automatically after it. However, this operation should not be operated even though I omit it in the case that the length of the string reached 20, because I could not deal with it in this way. It is an Algorithmic Error.
+    Therefore, by changing the algorithm, I tried to use a whole string whose length is total 40, to separate it in three parts. Then I won't deal with it separately because I provided a holistic string of the whole status bar. Therefore, I could use the this big string to deal with my input command instead of being confined in a string whose length is 20.
+
+/* CheckPoint 2 buglog */
+
+Bug No.5
+/********************* General Info *********************/
+
+Bug Type: Semantic Errors
+Bug Appeared: 10/13/2019 01:26:43
+Bug Solved: 10/13/2019 10:32:21
+Debug Time: About 4 hr 
+Bug Location: tuxctl-ioctl.c: in the function of controlling TUX_BUTTONS.
+
+/********************* Detail Info *********************/
+
+Description:
+	When I try my best to execute the instruction: copy_to_user((void*)arg, (void*) (&button_stats),sizeof(long)); I cannot copy the parameter correctly. The system always crashes if I execute this instruction.
+
+Solution:
+	From my perspective, I think the argument "&button_stats" may be ambiguous to the complier because it cannot clearly understand which type it is. Therefore, I chose to first isolate this pointer and cast it into long type.
+
+Bug No.6
+/********************* General Info *********************/
+
+Bug Type: Algorithm Error
+Bug Appeared: 10/14/2019 07:23:24
+Bug Solved: 10/13/2019 09:21:42
+Debug Time: About 2 hr
+Bug Location: input.c: in the function of separating the commands.
+
+/********************* Detail Info *********************/
+
+Description:
+	When I try the demo game of mp2. If demo pushes one of the keys in ABC and one of the keys in RLDU simultaneously, it will first work the up down left right then it will do the ABC. However, my program just go stuck.
+
+Solution:
+	From my perspective, I think the demo thinks that demo puts emphasis on RLDU. Then I find that if I push two different types of keys, the input status will not be 0x(...)F or 0xF(...). Instead, it could be a mixture of two types of command. Therefore, I just first deal with first 4 bits then deal with last 4 bit. Then it works!
+
+Bug No.7
+/********************* General Info *********************/
+
+Bug Type: Algorithm Error
+Bug Appeared: 10/13/2019 17:43:12
+Bug Solved: 10/13/2019 18:49:51
+Debug Time: About 4 hr 
+Bug Location: tuxctl-ioctl.c: in the function of controlling TUX_LED.
+
+/********************* Detail Info *********************/
+
+Description:
+	When I executing the su -c ./input. I can only see "0.03" on my LED screen. Therefore, I try my best to find the error in tuxctl-ioctl.c's LED part.
+
+Solution:
+	I think the argument I passed to the TUX is wrong. Therefore, I first try to find my algorithm bug of the bit shifting. Fortunately, I found that I have shifted the bit wrongly by 4. For example, the highest 4 bits I shift is 16 bits, but it should be 12 bits.
+
+Bug No.8
+/********************* General Info *********************/
+
+Bug Type: Algorithm Error
+Bug Appeared: 10/13/2019 12:15:24
+Bug Solved: 10/13/2019 17:32:28
+Debug Time: About 4 hr 
+Bug Location: input.c: in the function of controlling the TUX command.
+
+/********************* Detail Info *********************/
+
+Description:
+	In order to prevent the ABC button from keeping moving the scene, I add a previous command to do it. Nevertheless, when I try to press the A button for two times, but it did not work.
+Solution:
+	I think pressing A button for two times did not work because I did not know that the it will given two types of command if I have something wrong with that. Therefore, I should modify the previous value before the input.c file (in adventure.c).
+
+
+Bug No.9
+/********************* General Info *********************/
+
+Bug Type: Algorithm Error
+Bug Appeared: 10/14/2019 17:39:42
+Bug Solved: 10/14/2019 17:49:54
+Debug Time: About 10 min
+Bug Location: photo.c: Octree
+
+/********************* Detail Info *********************/
+
+Description:
+	I have noticed that I did not pushed the value next to 64 pre-determined value, therefore, I  should do it from 0x0040 (64) instead of . Then it works.
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
